@@ -18,7 +18,7 @@ def create(src, first_row, last_row):
         last_row (int): last row to read
     """
 
-    with open(src, mode="r", encoding="utf-16") as f:
+    with open(src, mode='r', encoding='utf-16') as f:
         content = f.readlines()[first_row:last_row]
 
     # Creates a dict using the second column as key and the rest as value
@@ -38,7 +38,7 @@ def dump(dst, data):
     try:
         with open(os.path.join(dst, 'tags.json'), mode='w+', encoding='utf-8') as f:
             json.dump(data, f)
-            print("Tags successfully exported!")
+            print('Tags successfully exported! \u2714')
     except Exception as e:
         raise e
 
