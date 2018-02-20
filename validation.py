@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """ validate.py Checks filename for valid tags """
 
+import csv
 import glob
 import json
 import os
@@ -49,8 +50,11 @@ class Tag(object):
         return corrections
 
     @staticmethod
-    def _dump_corrections():
-        pass
+    def dump_corrections():
+        data = Tag.get_corrections_from_file()
+
+        with open('corretions.json', mode='w+', encoding='utf-8') as f:
+            json.dump(data, f)
 
     def _get_valid_tag(self, index):
         try:
@@ -92,6 +96,21 @@ def validate(filename):
     return '_'.join(map(str, tags)) + extension
 
 
+def track_corrections(dst, filename):
+    """
+    Keeps track of corrections in the filename
+
+    Args:
+        dst (str): path to destination
+    """
+    new_filename = validate(filename)
+    row = [filename, new_filename, filename == new_filename]
+
+    with open(os.path.join(dst, 'corrections.csv'), 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(row)
+
+
 def check(src, dst):
     """
     Checks source for filenames and makes a valid copy into destination
@@ -105,9 +124,10 @@ def check(src, dst):
 
         try:
             valid_filename = validate(filename)
+            track_corrections(dst, filename)
+
             new_dst = os.path.join(dst, os.path.basename(dirname))
             new_file = os.path.join(new_dst, valid_filename)
-
             os.makedirs(new_dst, exist_ok=True)
             shutil.copy(pathname, new_file)
 
