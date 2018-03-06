@@ -1,0 +1,17 @@
+{
+    "data-source": ["00--", "00-n", "01-cso", "02-o2", "03-cd"],
+    "graph-type": ["00--", "00-n", "01-ver", "02-edg"],
+    "graph-detail": ["00--", "00-n", "01-pop", "02-vis", "03-tour", "04-pot", "05-get", "06-occ", "07-cap"],
+    "spacial-agregation": ["00--", "00-n", "01-stop", "02-lru", "03-lau2"],
+    "temporal-agregation": ["00--", "00-n", "01-15", "02-hr", "03-ngt", "04-mor", "05-aft", "06-evn", "07-day", "08-wk", "09-mth", "10-qrt", "11-yr"],
+    "trajectory-time-definition-point": ["00--", "00-n", "00-00", "01-15", "02-60", "03-180", "04-300", "05-300+"],
+    "fixed-route": ["00--", "00-n", "01-frt-1001", "02-frt-1002", "03-frt-1003", "04-frt-1004", "05-frt-1005", "06-frt-1006", "07-frt-1007", "08-frt-1008"],
+    "calculation-method": ["00--", "00-n", "01-sng", "02-uni", "03-rep"],
+    "statistics": ["00--", "00-n", "01-sb", "02-su"],
+    "statitics-detail": ["00--", "00-n", "01-wk", "02-tuth", "03-sasu"],
+    "transport-mode": ["00--", "00-n", "01-car", "02-rail", "03-bus"],
+    "demography-gender": ["00--", "00-n"],
+    "demography-age": ["00--", "00-n"],
+    "data-detail": ["00--", "00-n", "01-cso10", "02-kamp-cd"],
+    "control-sum": ["00--", "00-n", "00-yyyymmddhhmmss"]
+}
