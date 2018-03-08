@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-""" validate.py Checks filename for valid tags """
+""" validation.py Checks filename for valid tags """
 
 import csv
 import glob
@@ -31,29 +31,28 @@ class Tag(object):
         return "{} : {}".format(self.tag, self.value)
 
     @staticmethod
-    def get_tags_from_file():
-        with open('tags.json') as f:
+    def get_tags_from_file(filename='tags.json'):
+        with open(filename) as f:
             data = json.load(f, object_pairs_hook=OrderedDict)
 
         return list(data.keys())
 
     @staticmethod
-    def get_corrections_from_file():
-        with open('tags.json') as f:
+    def get_corrections_from_file(filename='tags.json'):
+        with open(filename) as f:
             data = json.load(f, object_pairs_hook=OrderedDict)
 
         corrections = OrderedDict()
         for k, v in data.items():
-            # get the last three characters as key
-            corrections[k] = OrderedDict(zip(map(lambda x: x[-3:], v), v))
-
+            # get the last four characters as key
+            corrections[k] = OrderedDict(zip(map(lambda x: x[-4:], v), v))
         return corrections
 
     @staticmethod
-    def dump_corrections():
+    def dump_corrections(filename='corretions.json'):
         data = Tag.get_corrections_from_file()
 
-        with open('corretions.json', mode='w+', encoding='utf-8') as f:
+        with open(filename, mode='w+', encoding='utf-8') as f:
             json.dump(data, f)
 
     def _get_valid_tag(self, index):
@@ -67,8 +66,8 @@ class Tag(object):
     def _get_valid_value(self, value):
         try:
             corrections = Tag.get_corrections_from_file().get(self.tag)
-            # get the last three characters as key
-            return corrections.get(value[-3:], '00-n')
+            # get the last four characters as key
+            return corrections.get(value[-4:], '00-n')
         except TypeError:
             return '00-n'
 
@@ -124,7 +123,6 @@ def check(src, dst):
 
         try:
             valid_filename = validate(filename)
-            track_corrections(dst, filename)
 
             new_dst = os.path.join(dst, os.path.basename(dirname))
             new_file = os.path.join(new_dst, valid_filename)
