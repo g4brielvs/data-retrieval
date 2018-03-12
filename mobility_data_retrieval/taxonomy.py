@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 """ taxonomy.py Creates and handles the taxonomy """
 
+import os
 import json
 
 import pandas as pd
@@ -22,15 +23,15 @@ class Taxonomy(object):
     def __str__(self):
         return self.taxonomy
 
-    def filter(self, names={}):
+    def filter(self, criteria='index', selection={}):
         """
-        Filter taxonomy using tag names
+        Filter the taxonomy using criteria and selection
 
         Args:
-            data (dict): taxonomy
-            names (set): set with names as filter criteria
+            criteria (str): criteria for filter
+            selection (set): selection for filter
         """
-        return dict(filter(lambda i:i[1].get('nameSeq') in names, self.taxonomy.items()))
+        return dict(filter(lambda i:i[1].get(criteria) in selection, self.taxonomy.items()))
 
     def get_tags(self):
         """
@@ -38,16 +39,15 @@ class Taxonomy(object):
         """
         return list(self.taxonomy.keys())
 
-    def get_text_from_tag(self, tag=None, key='txID'):
+    def get_text_from_tag(self, tag=None, name='txID'):
         """
         Get text description from taxonomy
 
         Args:
-            data (dict): taxonomy
             tag (str): tag id
-            key: (str): key of description
+            name: (str): key of description
         """
-        return self.taxonomy.get(tag).get(key)
+        return self.taxonomy.get(tag).get(name)
 
     def dump_taxonomy_to_file(self, dst='taxonomy.json', encoding='utf-8'):
         """
@@ -73,45 +73,42 @@ class Taxonomy(object):
         with open(pathname) as f:
             return json.load(f, object_pairs_hook=OrderedDict)
 
-def get_header(src, encoding='cp1252'):
+def get_column(src, encoding='utf-8', index=1):
     """
-    Get header from the data structure file
+    Get column as a list from file
 
     Args:
         src (str): path to the data structure file
     """
-    df = pd.read_csv(src, sep=',', encoding=encoding)
-    return list(df.columns.values)
+    return list(pd.read_csv(src, encoding=encoding, header=None).iloc[:, index])
 
-def get_names(src, encoding='cp1252', column_slice=1):
+def get_taxonomy_from_file(src, encoding='utf-8', tags=[], pivot='txID', names=[]):
     """
-    Get tag names from file
+    Creates a dictionary from tags and names into a taxonomy
 
     Args:
-        src (str): path to the data structure file
+        src (str): path to the data structure directory
+        tags (list): list of tags (str_tertiaryData)
+        names (list): list of names (hed_names)
     """
-    return list(pd.read_csv(src, encoding=encoding, header=None).iloc[:, column_slice])
+    taxonomy = dict()
 
-def get_taxonomy_from_file(src, encoding='cp1252', key='txID'):
-    """
-    Creates a taxonomy pivoting with key
+    for i, tag in enumerate(tags, 1):
+        pathname = os.path.join(src, '02-nam_{}.csv'.format(tag))
+        df = pd.read_csv(pathname, sep=',', names=names, converters={pivot: lambda x: str(x)}, encoding=encoding)
 
-    Args:
-        src (str): path to the data structure file
-    """
-    data = OrderedDict()
-    df = pd.read_csv(src, sep=',', converters={key: lambda x: str(x)}, encoding=encoding)
+        for _, row in df.iterrows():
+            key = '{}-{}'.format(i, row[pivot])
 
-    HEADER = get_header(src, encoding)
+            data = OrderedDict({'index' : i})
+            data.update(OrderedDict(((v, row[index]) for index, v in enumerate(names))))
+            taxonomy[key] = data
 
-    for _, row in df.iterrows():
-        data[row[key]] = OrderedDict(((i, row[i]) for i in HEADER))
-
-    return data
+    return taxonomy
 
 def fix_taxonomy_from_file(data=dict(), names=list()):
     """
-    Fixes a dictionary if default keys
+    Fixes a dictionary with default keys
 
     Args:
         src (str): path to the data structure file
@@ -131,10 +128,11 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('-s', '--source', required=True)
     parser.add_argument('-n', '--names', required=False)
+    parser.add_argument('-t', '--tags', required=False)
     args = parser.parse_args()
 
-    tax = get_taxonomy_from_file(args.source)
-    tax = fix_taxonomy_from_file(tax, get_names(args.names))
+    tax = get_taxonomy_from_file(src=args.source, tags=args.tags, names=args.names)
+    tax = fix_taxonomy_from_file(tax)
 
     t = Taxonomy(tax)
     t.dump_taxonomy_to_file()
