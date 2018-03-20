@@ -23,7 +23,7 @@ def check(src, taxonomy=Taxonomy()):
     tags = name.strip().split('_')
 
     for i, tag in enumerate(tags, 1):
-        possible_tags = taxonomy.filter(names={i}).keys()
+        possible_tags = taxonomy.filter(selection={i}).keys()
         if tag not in possible_tags:
             return False
     return True
